@@ -1,4 +1,5 @@
-import THREE from './Three';
+
+import * as THREE from './Three';
 import ReactDOM from 'react-dom';
 let OrbitControls = require('three-orbit-controls')(THREE);
 
@@ -48,28 +49,10 @@ class Paint {
     //Detector.addGetWebGLMessage();
     this.distance = 10000;
 
-    // lights processing
-    const hasMultipleLights = this.lights.reduce(
-      (acc, item) => acc && Array.isArray(item),
-      true
-    );
-    if (hasMultipleLights) {
-      this.lights.forEach(this.addLight.bind(this));
-    } else {
-      this.addLight(this.lights);
-    }
-
     this.reqNumber += 1;
     this.addSTLToScene(this.reqNumber);
   }
 
-  addLight(lights, index = 0) {
-    const directionalLight = new THREE.DirectionalLight(this.lightColor);
-    directionalLight.position.set(...lights);
-    directionalLight.name = DIRECTIONAL_LIGHT + index;
-    directionalLight.position.normalize();
-    this.scene.add(directionalLight);
-  }
 
   loadSTLFromUrl(url, reqId) {
     return new Promise(resolve => {
@@ -108,7 +91,7 @@ class Paint {
       // Center the object
       geometry.center();
 
-      let material = new THREE.MeshDepthMaterial({
+      let material = new THREE.MeshLambertMaterial({
         overdraw: true,
         color: this.modelColor
       });
@@ -152,6 +135,7 @@ class Paint {
       1,
       this.distance
     );
+    this.camera.add( new THREE.PointLight( 0xffffff, 0.8 ) );
 
     if (this.cameraZ === null) {
       this.cameraZ = Math.max(this.xDims * 3, this.yDims * 3, this.zDims * 3);
@@ -175,6 +159,8 @@ class Paint {
         this.camera,
         ReactDOM.findDOMNode(this.component)
       );
+      this.controls.enableDamping = false;
+      this.controls.enableRotate
       this.controls.enableKeys = false;
       this.controls.addEventListener('change', this.orbitRender.bind(this));
     }

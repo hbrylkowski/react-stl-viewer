@@ -8,7 +8,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _Three = require('./Three');
 
-var _Three2 = _interopRequireDefault(_Three);
+var THREE = _interopRequireWildcard(_Three);
 
 var _reactDom = require('react-dom');
 
@@ -16,11 +16,11 @@ var _reactDom2 = _interopRequireDefault(_reactDom);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var OrbitControls = require('three-orbit-controls')(_Three2.default);
+var OrbitControls = require('three-orbit-controls')(THREE);
 
 var DIRECTIONAL_LIGHT = 'directionalLight';
 
@@ -28,9 +28,9 @@ var Paint = function () {
   function Paint() {
     _classCallCheck(this, Paint);
 
-    this.loader = new _Three2.default.STLLoader();
-    this.scene = new _Three2.default.Scene();
-    this.renderer = new _Three2.default.WebGLRenderer({
+    this.loader = new THREE.STLLoader();
+    this.scene = new THREE.Scene();
+    this.renderer = new THREE.WebGLRenderer({
       antialias: true
     });
     this.reqNumber = 0;
@@ -72,31 +72,8 @@ var Paint = function () {
       //Detector.addGetWebGLMessage();
       this.distance = 10000;
 
-      // lights processing
-      var hasMultipleLights = this.lights.reduce(function (acc, item) {
-        return acc && Array.isArray(item);
-      }, true);
-      if (hasMultipleLights) {
-        this.lights.forEach(this.addLight.bind(this));
-      } else {
-        this.addLight(this.lights);
-      }
-
       this.reqNumber += 1;
       this.addSTLToScene(this.reqNumber);
-    }
-  }, {
-    key: 'addLight',
-    value: function addLight(lights) {
-      var _directionalLight$pos;
-
-      var index = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
-
-      var directionalLight = new _Three2.default.DirectionalLight(this.lightColor);
-      (_directionalLight$pos = directionalLight.position).set.apply(_directionalLight$pos, _toConsumableArray(lights));
-      directionalLight.name = DIRECTIONAL_LIGHT + index;
-      directionalLight.position.normalize();
-      this.scene.add(directionalLight);
     }
   }, {
     key: 'loadSTLFromUrl',
@@ -145,19 +122,19 @@ var Paint = function () {
         // Center the object
         geometry.center();
 
-        var material = new _Three2.default.MeshLambertMaterial({
+        var material = new THREE.MeshLambertMaterial({
           overdraw: true,
           color: _this3.modelColor
         });
 
         if (geometry.hasColors) {
-          material = new _Three2.default.MeshPhongMaterial({
+          material = new THREE.MeshPhongMaterial({
             opacity: geometry.alpha,
-            vertexColors: _Three2.default.VertexColors
+            vertexColors: THREE.VertexColors
           });
         }
 
-        _this3.mesh = new _Three2.default.Mesh(geometry, material);
+        _this3.mesh = new THREE.Mesh(geometry, material);
         // Set the object's dimensions
         geometry.computeBoundingBox();
         _this3.xDims = geometry.boundingBox.max.x - geometry.boundingBox.min.x;
@@ -184,7 +161,8 @@ var Paint = function () {
     key: 'addCamera',
     value: function addCamera() {
       // Add the camera
-      this.camera = new _Three2.default.PerspectiveCamera(30, this.width / this.height, 1, this.distance);
+      this.camera = new THREE.PerspectiveCamera(30, this.width / this.height, 1, this.distance);
+      this.camera.add(new THREE.PointLight(0xffffff, 0.8));
 
       if (this.cameraZ === null) {
         this.cameraZ = Math.max(this.xDims * 3, this.yDims * 3, this.zDims * 3);
@@ -206,6 +184,8 @@ var Paint = function () {
       // Add controls for mouse interaction
       if (this.orbitControls) {
         this.controls = new OrbitControls(this.camera, _reactDom2.default.findDOMNode(this.component));
+        this.controls.enableDamping = false;
+        this.controls.enableRotate;
         this.controls.enableKeys = false;
         this.controls.addEventListener('change', this.orbitRender.bind(this));
       }
