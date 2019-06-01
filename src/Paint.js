@@ -108,7 +108,7 @@ class Paint {
       // Center the object
       geometry.center();
 
-      let material = new THREE.MeshLambertMaterial({
+      let material = new THREE.MeshDepthMaterial({
         overdraw: true,
         color: this.modelColor
       });
